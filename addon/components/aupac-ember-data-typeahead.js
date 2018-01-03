@@ -30,22 +30,22 @@ export default AupacTypeahead.extend({
     if (this.get('_typeahead')) { // Was failing in tests with this probably due to a stray observer
       selection = this.transformSelection(selection);
       if (typeof selection === 'string') {
-        this.get('_typeahead').typeahead('val', selection);
+	this.get('_typeahead').typeahead('val', selection);
       } else {
-        const displayKey = this.get('displayKey');
-        const modelClass = this.get('modelClass');
-        if(selection && selection.get('id')) {
-          const item = this.get('store').peekRecord(modelClass, selection.get('id'));
-          if (isNone(item)) {
-            this.get('store').findRecord(modelClass, selection.get('id')).then((model) => {
-              this.get('_typeahead').typeahead('val', model.get(displayKey));
-            });
-          } else {
-            this.get('_typeahead').typeahead('val', item.get(displayKey));
-          }
-        } else {
-          this.get('_typeahead').typeahead('val', '');
-        }
+	const displayKey = this.get('displayKey');
+	const modelClass = this.get('modelClass');
+	if(selection && selection.get('id')) {
+	  const item = this.get('store').peekRecord(modelClass, selection.get('id'));
+	  if (isNone(item)) {
+	    this.get('store').findRecord(modelClass, selection.get('id')).then((model) => {
+	      this.get('_typeahead').typeahead('val', model.get(displayKey));
+	    });
+	  } else {
+	    this.get('_typeahead').typeahead('val', item.get(displayKey));
+	  }
+	} else {
+	  this.get('_typeahead').typeahead('val', '');
+	}
       }
     }
   },
@@ -54,15 +54,22 @@ export default AupacTypeahead.extend({
    * @Override
    */
   _commitSelection: function() {
+
     const model = this.get('selection');
 
     if (this.get('allowFreeInput')) {
+      const searchResults = this.get("searchResults");
+      if(searchResults.length){
+	let value = searchResults[0];
+	this.updateSelectionWhenChanged(value);
+	return;
+      }
       const displayKey = this.get('displayKey');
-      const displayValue = typeOf(model) === 'instance' ? model.get(displayKey) : undefined
+      const displayValue = typeOf(model) === 'instance' ? model.get(displayKey) : undefined;
       const value = this.get('_typeahead').typeahead('val');
 
       if (displayValue !== value) {
-        this.updateSelectionWhenChanged(value);
+	this.updateSelectionWhenChanged(value);
       }
     } else if (model) {
       this.setValue(model);
@@ -85,6 +92,7 @@ export default AupacTypeahead.extend({
   /**
    * @Override
    */
+  searchResults: Ember.A(),
   source : computed(function() {
     const _this = this;
     return function (query, syncResults, asyncResults) {
@@ -93,11 +101,12 @@ export default AupacTypeahead.extend({
       const queryObj = Ember.$.extend(true, {}, q , _this.get('params'));
 
       _this.get('store').query(_this.get('modelClass'), queryObj).then(function(models) {
-        let emberDataModels = [];
-        models.get('content').forEach(function(model, i) {
-          emberDataModels[i] = model.getRecord();
-        });
-        asyncResults(emberDataModels);
+	let emberDataModels = [];
+	models.get('content').forEach(function(model, i) {
+	  emberDataModels[i] = model.getRecord();
+	});
+	_this.set("searchResults",emberDataModels);
+	asyncResults(emberDataModels);
       });
     };
   }),

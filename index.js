@@ -7,7 +7,6 @@ var MergeTrees = require('broccoli-merge-trees');
 
 module.exports = {
   name: 'ember-aupac-typeahead',
-
   included(app) {
     this._super.included.apply(this, arguments);
 
@@ -37,6 +36,9 @@ module.exports = {
     });
 
     return new MergeTrees([vendorTree, momentTree]);
-  }
+  },
+  isDevelopingAddon: function() {
+    return true;
+  },
 
 };
