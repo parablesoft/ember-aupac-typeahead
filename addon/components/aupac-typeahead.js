@@ -85,9 +85,12 @@ export default Component.extend({
   didInsertElement: function () {
     this._super(...arguments);
     this.initializeTypeahead();
-    if (this.get('autoFocus') === true) {
-      this.get('_typeahead').focus();
-    }
+    let typeahead = this.get('_typeahead')
+    if (this.get('autoFocus') === true)
+      typeahead.focus()
+    if (this.get("maxLength"))
+      typeahead.prop("maxlength",this.get("maxLength"))
+
     this.addObserver('disabled', this.disabledStateChanged);
   },
 
