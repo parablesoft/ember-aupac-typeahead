@@ -10,6 +10,7 @@ export default AupacTypeahead.extend({
   params : {}, //@public
   async : true, //@public
   queryKey : 'q', //@public
+  firstSelection: true,
 
   //private
   store : inject.service('store'),
@@ -59,11 +60,15 @@ export default AupacTypeahead.extend({
 
     if (this.get('allowFreeInput')) {
       const searchResults = this.get("searchResults");
-      if(searchResults.length){
-        let value = searchResults[0];
-        this.updateSelectionWhenChanged(value);
-        return;
+      
+      if(this.get("firstSelection")){
+        if(searchResults.length){
+          let value = searchResults[0];
+          this.updateSelectionWhenChanged(value);
+          return;
+        }
       }
+
       const displayKey = this.get('displayKey');
       const displayValue = typeOf(model) === 'instance' ? model.get(displayKey) : undefined;
       const value = this.get('_typeahead').typeahead('val');
